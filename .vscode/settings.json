@@ -11,9 +11,9 @@
     "message": "running...",
     "commands": [
       {
-        "message": "running...",
-        "match": "src\\\\.*\\.af$",
-        "cmd": "echo test && metaf ${file} dist/"
+        "message": "{relativeFile}",
+        "match": "src\\\\.*\\.(af|met|nav)$",
+        "cmd": "powershell -NoProfile -Command \"$rel='${relativeFile}'; $rel=$rel -replace '^src\\\\',''; $reldir=Split-Path $rel -Parent; metaf ${file} dist\\\\${reldir}\\\\"
       }
     ]
   }
