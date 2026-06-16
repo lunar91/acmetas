@@ -41,7 +41,7 @@
 STATE: {Default} ~~ {
 	IF: Always
 		DO: DoAll
-			Chat {/ub opt set VTank.PatchExpressionEngine true}
+				Chat {/ub opt set VTank.PatchExpressionEngine true}
 ~~}
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
