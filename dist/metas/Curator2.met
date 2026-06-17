@@ -497,7 +497,7 @@ s
 i
 2
 i
-5
+1
 TABLE
 2
 K
@@ -557,21 +557,8 @@ s
 e
 s
 wobjectfindnearestbynameandobjectclass[5,Curator of Torment]!=0
-TABLE
-2
-k
-v
-n
-n
-2
-s
-st
 s
 IncDiff
-s
-ret
-s
-0-init
 s
 2-Run
 i
@@ -1029,7 +1016,7 @@ s
 i
 21
 i
-5
+1
 TABLE
 2
 K
@@ -1050,21 +1037,8 @@ s
 e
 s
 wobjectfindininventorybynamerx[Shard of the Curator]!=0
-TABLE
-2
-k
-v
-n
-n
-2
-s
-st
 s
 IncDiff
-s
-ret
-s
-0-init
 s
 5-TurnIn
 i
@@ -1208,22 +1182,9 @@ e
 s
 echo[`You are still on timer for `+$questName+` in `+$realm+`. Skipping to next realm.`,12]
 i
-5
-TABLE
-2
-k
-v
-n
-n
-2
-s
-st
+1
 s
 IncDiff
-s
-ret
-s
-CheckQuestFlag
 s
 CheckQuestFlag
 i
@@ -1687,9 +1648,9 @@ e
 s
 echo[`Changed realm to `+$realm+`.`,13]
 i
-6
-i
-0
+1
+s
+CheckQuestFlag
 s
 IncDiff
 i

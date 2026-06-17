@@ -114,7 +114,7 @@ STATE: {2-Run} ~~ {
 			NavEmpty
 			Not Expr {wobjectfindnearestbynameandobjectclass[27,Corpse of Curator of Torment]!=0}
 			Not Expr {wobjectfindnearestbynameandobjectclass[5,Curator of Torment]!=0}
-		DO: CallState {IncDiff} {0-init}
+		DO: SetState {IncDiff}
 	IF:	All
 			NavEmpty
 			Expr {wobjectfindnearestbynameandobjectclass[27,Corpse of Curator of Torment]!=0}
@@ -178,7 +178,7 @@ STATE: {5-TurnIn} ~~ {
 		DO: Chat {/mt givep Shard of the Curator to Morgethais}
 
 	IF:	Not Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
-		DO:	CallState {IncDiff} {0-init}
+		DO:	SetState {IncDiff}
 	
 	IF: All
 			NavEmpty
@@ -208,7 +208,7 @@ STATE: {CheckQuestFlag} ~~ {
 	IF: Not Expr {getqueststatus[dictgetitem[$realms,$realm]+$questFlag]==1}
 		DO: DoAll
 				DoExpr {echo[`You are still on timer for `+$questName+` in `+$realm+`. Skipping to next realm.`,12]}
-				CallState {IncDiff} {CheckQuestFlag}
+				SetState {IncDiff}
 ~~ }
 
 ~~ Uses portal gem to go to TN. Retries every 2 seconds.
@@ -281,7 +281,7 @@ STATE: {IncDiff} ~~ {
 		DO: DoAll
 				DoExpr {$realm=listgetitem[$allRealms,$realmIndex]}
 				DoExpr {echo[`Changed realm to `+$realm+`.`,13]}
-				Return
+				SetState {CheckQuestFlag}
 ~~ }
 
 STATE: {Done} ~~ {
