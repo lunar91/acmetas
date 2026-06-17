@@ -36,22 +36,41 @@
 ~~		cht					jmp															
 ~~		prt (deprecated in VTank)														
 ~~ }											
-~~ aetheriumcorefragmentpickuptimer
-~~ Default state. This handles starting when the meta is first selected. This should be configured on EVERY meta
-STATE: {Default} ~~ {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~ Configuration Goes Here
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~ Meta Specific Configurations like setting VTank Options
+STATE: {Setup} ~~ {
+	IF:	Always
+		DO:	DoAll				
+				DoExpr {$questFlag=`aetheriumcorefragmentpickuptimer`}
+				DoExpr {$questName=`Unleash the Gearknights`}
+				SetOpt {EnableNav} {true}
+				SetOpt {EnableLooting} {false}
+				SetOpt {EnableCombat} {true}
+				Return
+~~ }
+
+STATE: {Death} ~~ {
 	IF: Always
 		DO: DoAll
-				Chat {/myquests}
-				Chat {/ub opt set VTank.PatchExpressionEngine true}
-				DoExpr {setvar[realms,dictcreate[Normal,``,Hard,`difficulty-hard:`,Expert,`difficulty-expert:`,Master,`difficulty-master:`,Nightmare,`difficulty-nightmare:`,Torment,`difficulty-torment:`,Torment II,`difficulty-torment-ii:`,Torment III,`difficulty-torment-iii:`,Torment IV,`difficulty-torment-iv:`,Torment V,`difficulty-torment-v:`,Torment VI,`difficulty-torment-vi`]]}
-				DoExpr {setvar[realm,Normal]}
-	IF: ChatMatch {Quest data updated}
-		DO: SetState {0-init}
-~~}
+				SetOpt {EnableNav} {true}
+				SetOpt {EnableLooting} {false}
+				SetOpt {EnableCombat} {true}
+				Return
+~~ }
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-~~ Put details for this specific meta here
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~ The Meta Process Goes Here
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 STATE: {1-Start} ~~ {
 	IF: Expr {isportaling[]==0}
 		DO: DoAll
@@ -118,20 +137,12 @@ STATE: {5-TurnIn} ~~ {
 ~~ Everything below this is global to all metas.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-STATE: {SETUP} ~~ {
-	IF: Always
-		DO: DoAll
-				SetOpt {EnableNav} {true}
-				SetOpt {EnableLooting} {false}
-				SetOpt {EnableCombat} {true}
-				Return
-~~ }
 STATE: {0-init} ~~ {
-	IF: Expr {getqueststatus[dictgetitem[$realms,$realm]+`aetheriumcorefragmentpickuptimer`]==1}
+	IF: Not Expr {getqueststatus[dictgetitem[$realms,$realm]+`aetheriumcorefragmentpickuptimer`]==1}
 		DO: DoAll
-				DoExpr {echo[`You are still on timer for Lost Lore in `+$realm+`. Skipping to the next realm.`,12]}
+				DoExpr {echo[`You are still on timer for Unleashing Gearknights in `+$realm+`. Skipping to the next realm.`,12]}
 				CallState {IncDiff} {0-init}
-	IF:	Not Expr {getqueststatus[dictgetitem[$realms,$realm]+`aetheriumcorefragmentpickuptimer`]==1}
+	IF:	Expr {getqueststatus[dictgetitem[$realms,$realm]+`aetheriumcorefragmentpickuptimer`]==1}
 		DO:	DoAll
 				SetOpt {EnableNav} {true}
 				SetOpt {EnableLooting} {false}
@@ -144,29 +155,128 @@ STATE: {0-init} ~~ {
 	IF:	SecsInStateGE 10
 		DO:	SetState {0-init}
 ~~ }
-STATE: {Death} ~~ {
-	IF:	Always
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~ Universal States below this.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~ Check Quest Flag
+~~ If it passes, call Setup with return to 0-init
+~~ If it fails, increase the difficulty.
+STATE: {CheckQuestFlag} ~~ {
+	IF: Expr {$realm==NONE}
+		DO: SetState {Done}
+	IF:	Expr {getqueststatus[dictgetitem[$realms,$realm]+$questFlag]==1}
 		DO:	DoAll
-				SetOpt {EnableNav} {true}
-				Return
+				DoExpr {echo[`Starting `+$questName+` in `+$realm+`.`,12]}
+				SetState {0-init}
+	IF: Not Expr {getqueststatus[dictgetitem[$realms,$realm]+$questFlag]==1}
+		DO: DoAll
+				DoExpr {echo[`You are still on timer for `+$questName+` in `+$realm+`. Skipping to next realm.`,12]}
+				CallState {IncDiff} {CheckQuestFlag}
+~~ }
+
+~~ Uses portal gem to go to TN. Retries every 2 seconds.
+STATE: {GoToTN} ~~ {
+	IF: Always
+		DO: EmbedNav nav_empty {[None]}
+	IF: All
+			Not Expr {isportaling[]}
+			Expr {getbusystate[]==0}
+		DO: DoExpr {chatbox[\/ub usei Portal to Town Network Recall Gem +\(+getvar[realm]+\)]}
+	IF: All
+			ExitPortal
+			BlockE 00070000
+		DO: Return
+	IF: All
+			Not Expr {isportaling[]}
+			SecsInStateGE 5
+		DO: SetState {GoToTN}
+~~ }
+
+~~ Starts the meta. Sets the $realm and $realms variables
+~~ Runs /myquests
+~~ Sets the state to CheckQuestFlag.
+STATE: {Default} ~~ {
+	IF: Always
+		DO: CallState {Setup} {InternalSetup}
+~~ }
+
+STATE: {InternalSetup} ~~{
+	IF: Always
+		DO: DoAll
+				EmbedNav nav_empty {[None]}
+				DoExpr {echo[`Thanks for using Lu Nartic's `+$questName+` Meta!`,12]}
+				DoExpr {echo[`Settings: @minRealm=`+iif[@minRealm!=0,``+@minRealm,`Normal`]+`; @maxRealm=`+iif[@maxRealm!=0,``+@maxRealm,`Torment VI`]+`; @realmOrder=`+iif[@realmOrder==DOWN,`DOWN`,`UP`],12]}
+				DoExpr {echo[`Change a setting by typing /ub mexec @setting=value   [IE: /ub mexec @minRealm=Torment]`,12]}
+				Chat {/ub opt set VTank.PatchExpressionEngine true}
+				DoExpr {setvar[realms,dictcreate[Normal,``,Hard,`difficulty-hard:`,Expert,`difficulty-expert:`,Master,`difficulty-master:`,Nightmare,`difficulty-nightmare:`,Torment,`difficulty-torment:`,Torment II,`difficulty-torment-ii:`,Torment III,`difficulty-torment-iii:`,Torment IV,`difficulty-torment-iv:`,Torment V,`difficulty-torment-v:`,Torment VI,`difficulty-torment-vi`]]}
+				DoExpr {setvar[allRealms,listcreate[Normal,Hard,Expert,Master,Nightmare,Torment,Torment II,Torment III,Torment IV,Torment V,Torment VI]]}
+				DoExpr {$realmIndex=iif[@realmOrder!=DOWN,iif[getobjectinternaltype[@minRealm]==3&&listindexof[$allRealms,@minRealm]>-1,listindexof[$allRealms,@minRealm],0],iif[getobjectinternaltype[@maxRealm]==3&&listindexof[$allRealms,@maxRealm]>-1,listindexof[$allRealms,@maxRealm],0]]}
+				DoExpr {$realm=listgetitem[$allRealms,$realmIndex]}
+				DoExpr {setvar[quest_counter, 0]}
+				DoExpr {setvar[meta_timer, stopwatchcreate[]]}
+				DoExpr {stopwatchstart[$meta_timer]}
+				Chat {/myquests}
+	IF: ChatMatch {\[UB\] Quest data updated}
+		DO: SetState {WaitForQuestFlags}
+~~ }
+
+STATE: {WaitForQuestFlags} ~~ {
+	IF: SecsInStateGE 2
+		DO: SetState {CheckQuestFlag}
+~~ }
+
+STATE: {WaitForQuestFlags} ~~ {
+	IF: SecsInStateGE 2
+		DO: SetState {CheckQuestFlag}
 ~~ }
 
 ~~ Handles changing the realm
 ~~ if order is DOWN then it goes Torment VI -> Torment V -> ...
 ~~ Otherwise the it goes Normal -> Hard -> ...
+~~ New Strategy: Create list of realms. Track a realmIndex var.
 STATE: {IncDiff} ~~ {
-	IF: Not Expr {getvar[order]==DOWN}
-		DO: DoAll
-				DoExpr {setvar[realm,iif[getvar[realm]==0,Normal,iif[getvar[realm]==Normal,Hard,iif[getvar[realm]==Hard,Expert,iif[getvar[realm]==Expert,Master,iif[getvar[realm]==Master,Nightmare,iif[getvar[realm]==Nightmare,Torment,iif[getvar[realm]==Torment,Torment II,iif[getvar[realm]==Torment II,Torment III,iif[getvar[realm]==Torment III, Torment IV,iif[getvar[realm]==Torment IV, Torment V,iif[getvar[realm]==Torment V,Torment VI,NONE]]]]]]]]]]]]}
-				Return
-	IF:	Expr {getvar[order]==DOWN}
-		DO:	DoAll
-				DoExpr {setvar[realm,iif[getvar[realm]==0,Normal,iif[getvar[realm]==Normal,Hard,iif[getvar[realm]==Hard,Expert,iif[getvar[realm]==Expert,Master,iif[getvar[realm]==Master,Nightmare,iif[getvar[realm]==Nightmare,Torment,iif[getvar[realm]==Torment,Torment II,iif[getvar[realm]==Torment II,Torment III,iif[getvar[realm]==Torment III, Torment IV,iif[getvar[realm]==Torment IV, Torment V,iif[getvar[realm]==Torment V,Torment VI,NONE]]]]]]]]]]]]}
-				Return
 	IF: Always
-		DO: DoExpr {setvar[realms,listcreate[one,two,three]]}
+		DO: DoAll
+				DoExpr {ifthen[@realmOrder!=DOWN,`$realmIndex=$realmIndex+1`,`$realmIndex=$realmIndex-1`]}
 
+	IF: Any
+			Expr {iif[@realmOrder==DOWN&&getobjectinternaltype[@minRealm]==3,$realmIndex<listindexof[$allRealms,@minRealm],$realmIndex<0]}
+			Expr {iif[@realmOrder!=DOWN&&getobjectinternaltype[@maxRealm]==3,$realmIndex>listindexof[$allRealms,@maxRealm],$realmIndex>listcount[$allRealms]]}
+		DO: DoAll
+				SetState {Done}
+	
+	IF: Always
+		DO: DoAll
+				DoExpr {$realm=listgetitem[$allRealms,$realmIndex]}
+				DoExpr {echo[`Changed realm to `+$realm+`.`,13]}
+				Return
 ~~ }
+
+STATE: {Done} ~~ {
+	IF: Always
+		DO: DoAll
+				SetOpt {EnableNav} {false}
+				DoExpr {stopwatchstop[$meta_timer]}
+				DoExpr {echo[`Finished `+$quest_counter+` quests in `+stopwatchelapsedseconds[$meta_timer]+` seconds.`,13]}
+	~~ Can add logic here for starting next meta?
+~~}
+
+NAV: nav_empty once ~~ {}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~ Navs below this.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 
 NAV: to_quest_boss once ~~ {
