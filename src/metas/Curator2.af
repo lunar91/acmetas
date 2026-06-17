@@ -38,29 +38,71 @@
 ~~ }																					
 
 ~~  tormentshardpickup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~ Configuration Goes Here
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~ Meta Specific Configurations like setting VTank Options
+STATE: {Setup} ~~ {
+	IF:	Always
+		DO:	DoAll				
+				DoExpr {$questFlag=`tormentshardpickup`}
+				DoExpr {$questName=`Curator of Torment`}
+				SetOpt {EnableNav} {true}
+				SetOpt {EnableLooting} {false}
+				SetOpt {EnableCombat} {true}
+				Return
+~~ }
+
+STATE: {Death} ~~ {
+	IF: Always
+		DO: DoAll
+				SetOpt {EnableNav} {true}
+				Return
+~~ }
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~ The Meta Process Goes Here
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~ Uses portal gem to go to TN. Retries every 2 seconds.
+STATE: {GoToEncampment} ~~ {
+	IF: Always
+		DO: EmbedNav nav_empty {[None]}
+	IF: All
+			Not Expr {isportaling[]}
+			Expr {getbusystate[]==0}
+		DO: DoExpr {chatbox[\/ub usei Rynthid Encampment Recall Gem +\(+getvar[realm]+\)]}
+	IF: All
+			ExitPortal
+			BlockE 30320000
+		DO: Return
+	IF: All
+			Not Expr {isportaling[]}
+			SecsInStateGE 5
+		DO: SetState {GoToEncampment}
+~~ }
+
 STATE: {0-init} ~~ {
 	IF:	Always
 		DO:	DoAll
 				SetOpt {EnableNav} {true}
-				CallState {1-RE} {2-NR}
 				SetOpt {EnableLooting} {false}
 				SetOpt {EnableCombat} {false}
+				CallState {GoToEncampment} {1-Load-Curator-Nav}
 ~~ }
-STATE: {1-RE} ~~ {
-	IF: Not Expr {getqueststatus[dictgetitem[$realms,$realm]+`tormentshardpickup`]==1}
+
+STATE: {1-Load-Curator-Nav} ~~ {
+	IF: Always
 		DO: DoAll
-				DoExpr {echo[`You are still on timer for Curator in `+$realm+`. Skipping to the next realm.`,12]}
-				SetState {IncDiff}
-	IF:	Expr {getqueststatus[dictgetitem[$realms,$realm]+`tormentshardpickup`]==1}
-		DO:	DoExpr {chatbox[\/ub usei Rynthid Encampment Recall Gem +\(+getvar[realm]+\)]}
-	IF:	All
-			ExitPortal
-			BlockE 30320000
-		DO:	DoAll
-				EmbedNav nav0____None__nav { ToCurator.nav}
+				EmbedNav nav_to_curator {RunToCurator}
 				SetState {2-Run}
-	IF:	SecsInStateGE 10
-		DO:	SetState {1-RE}
 ~~ }
 STATE: {2-Run} ~~ {
 	IF:	ChatCapture {cast (.*) on you(\.|,|\s|$)} {}
@@ -72,7 +114,7 @@ STATE: {2-Run} ~~ {
 			NavEmpty
 			Not Expr {wobjectfindnearestbynameandobjectclass[27,Corpse of Curator of Torment]!=0}
 			Not Expr {wobjectfindnearestbynameandobjectclass[5,Curator of Torment]!=0}
-		DO: SetState {IncDiff}
+		DO: CallState {IncDiff} {0-init}
 	IF:	All
 			NavEmpty
 			Expr {wobjectfindnearestbynameandobjectclass[27,Corpse of Curator of Torment]!=0}
@@ -91,15 +133,9 @@ STATE: {3-Loot} ~~ {
 	IF:	All
 			Expr {wobjectgetopencontainer[]==0}
 			Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
-		DO:	DoAll
-				DoExpr {chatbox[\/ub usei Rynthid Encampment Recall Gem +\(+getvar[realm]+\)]}
-	
-~~ We started turn in by using the recall gem. Move to the turn in state
-	IF:	All
-			IntoPortal
-			BlockE 30320000
-		DO:	SetState {4-TurnIn}
-		
+			Expr {getbusystate[]==0}
+		DO:	CallState {GoToEncampment} {4-Load-Turnin-Nav}
+			
 ~~ If no mobs nearby, and a container isn't open, open the corpse.
 	IF:	All
 			NoMobsInDist 10
@@ -121,46 +157,146 @@ STATE: {3-Loot} ~~ {
 			Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
 		DO:	SetState {3-Loot}
 
-~~ Test
 	IF:	All
 			Death
 			Not Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
 		DO:	CallState {Death} {1-RE}
 ~~ }
-STATE: {4-TurnIn} ~~ {
-	IF:	ExitPortal
-		DO:	EmbedNav nav1____None__nav { TurnIn.nav}
-	IF:	Not Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
-		DO:	SetState {IncDiff}
+STATE: {4-Load-Turnin-Nav} ~~ {
+	IF: Always
+		DO: DoAll
+				EmbedNav nav_turnin { TurnIn.nav}
+				SetState {5-TurnIn}
+~~ }
+STATE: {5-TurnIn} ~~ {
 	IF:	Always
 		DO:	Chat {/b d}
+
+	IF: All
+			NavEmpty
+			Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
+		DO: Chat {/mt givep Shard of the Curator to Morgethais}
+
+	IF:	Not Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
+		DO:	CallState {IncDiff} {0-init}
+	
+	IF: All
+			NavEmpty
+			SecsInStateGE 5
+			Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
+		DO: SetState {5-TurnIn}
 ~~ }
-STATE: {Death} ~~ {
-	IF:	Always
-		DO:	DoAll
-				SetOpt {EnableNav} {true}
-				Return
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~ Universal States below this.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~ Check Quest Flag
+~~ If it passes, call Setup with return to 0-init
+~~ If it fails, increase the difficulty.
+STATE: {CheckQuestFlag} ~~ {
+	IF: Expr {$realm==NONE}
+		DO: SetState {Done}
+	IF:	Expr {getqueststatus[dictgetitem[$realms,$realm]+$questFlag]==1}
+		DO:	SetState {0-init}
+	IF: Not Expr {getqueststatus[dictgetitem[$realms,$realm]+$questFlag]==1}
+		DO: DoAll
+				DoExpr {echo[`You are still on timer for `+$questName+` in `+$realm+`. Skipping to next realm.`,12]}
+				CallState {IncDiff} {CheckQuestFlag}
 ~~ }
+
+~~ Uses portal gem to go to TN. Retries every 2 seconds.
+STATE: {GoToTN} ~~ {
+	IF: Always
+		DO: EmbedNav nav_empty {[None]}
+	IF: All
+			Not Expr {isportaling[]}
+			Expr {getbusystate[]==0}
+		DO: DoExpr {chatbox[\/ub usei Portal to Town Network Recall Gem +\(+getvar[realm]+\)]}
+	IF: All
+			ExitPortal
+			BlockE 00070000
+		DO: Return
+	IF: All
+			Not Expr {isportaling[]}
+			SecsInStateGE 5
+		DO: SetState {GoToTN}
+~~ }
+
+~~ Starts the meta. Sets the $realm and $realms variables
+~~ Runs /myquests
+~~ Sets the state to CheckQuestFlag.
 STATE: {Default} ~~ {
-	IF:	Always
-		DO:	DoAll
+	IF: Always
+		DO: CallState {Setup} {InternalSetup}
+~~ }
+
+STATE: {InternalSetup} ~~{
+	IF: Always
+		DO: DoAll
+				EmbedNav nav_empty {[None]}
+				DoExpr {echo[`Thanks for using Lu Nartic's `+$questName+` Meta!`,12]}
+				DoExpr {echo[`Settings: @minRealm=`+iif[@minRealm!=0,``+@minRealm,`Normal`]+`; @maxRealm=`+iif[@maxRealm!=0,``+@maxRealm,`Torment VI`]+`; @realmOrder=`+iif[@realmOrder==DOWN,`DOWN`,`UP`],12]}
+				DoExpr {echo[`Change a setting by typing /ub mexec @setting=value   [IE: /ub mexec @minRealm=Torment]`,12]}
 				Chat {/myquests}
 				Chat {/ub opt set VTank.PatchExpressionEngine true}
 				DoExpr {setvar[realms,dictcreate[Normal,``,Hard,`difficulty-hard:`,Expert,`difficulty-expert:`,Master,`difficulty-master:`,Nightmare,`difficulty-nightmare:`,Torment,`difficulty-torment:`,Torment II,`difficulty-torment-ii:`,Torment III,`difficulty-torment-iii:`,Torment IV,`difficulty-torment-iv:`,Torment V,`difficulty-torment-v:`,Torment VI,`difficulty-torment-vi`]]}
-				DoExpr {setvar[realm,Normal]}
+				DoExpr {setvar[allRealms,listcreate[Normal,Hard,Expert,Master,Nightmare,Torment,Torment II,Torment III,Torment IV,Torment V,Torment VI]]}
+				DoExpr {$realmIndex=iif[@realmOrder!=DOWN,iif[getobjectinternaltype[@minRealm]==3&&listindexof[$allRealms,@minRealm]>-1,listindexof[$allRealms,@minRealm],0],iif[getobjectinternaltype[@maxRealm]==3&&listindexof[$allRealms,@maxRealm]>-1,listindexof[$allRealms,@maxRealm],0]]}
+				DoExpr {$realm=listgetitem[$allRealms,$realmIndex]}
+				DoExpr {setvar[quest_counter, 0]}
+				DoExpr {setvar[meta_timer, stopwatchcreate[]]}
+				DoExpr {stopwatchstart[$meta_timer]}
 	IF: ChatMatch {Quest data updated}
-		DO: SetState {0-init}
+		DO: SetState {CheckQuestFlag}
 ~~ }
+
+~~ Handles changing the realm
+~~ if order is DOWN then it goes Torment VI -> Torment V -> ...
+~~ Otherwise the it goes Normal -> Hard -> ...
+~~ New Strategy: Create list of realms. Track a realmIndex var.
 STATE: {IncDiff} ~~ {
-	IF:	Always
-		DO:	DoAll
-				DoExpr {setvar[realm,iif[getvar[realm]==Normal,Hard,iif[getvar[realm]==Hard,Expert,iif[getvar[realm]==Expert,Master,iif[getvar[realm]==Master,Nightmare,iif[getvar[realm]==Nightmare,Torment,iif[getvar[realm]==Torment,Torment II,iif[getvar[realm]==Torment II,Torment III,iif[getvar[realm]==Torment III, Torment IV,iif[getvar[realm]==Torment IV, Torment V,iif[getvar[realm]==Torment V,Torment VI,NONE]]]]]]]]]]]}
-				SetState {0-init}
+	IF: Always
+		DO: DoAll
+				DoExpr {ifthen[@realmOrder!=DOWN,`$realmIndex=$realmIndex+1`,`$realmIndex=$realmIndex-1`]}
+
+	IF: Any
+			Expr {iif[@realmOrder==DOWN&&getobjectinternaltype[@minRealm]==3,$realmIndex<listindexof[$allRealms,@minRealm],$realmIndex<0]}
+			Expr {iif[@realmOrder!=DOWN&&getobjectinternaltype[@maxRealm]==3,$realmIndex>listindexof[$allRealms,@maxRealm],$realmIndex>listcount[$allRealms]]}
+		DO: DoAll
+				SetState {Done}
+	
+	IF: Always
+		DO: DoAll
+				DoExpr {$realm=listgetitem[$allRealms,$realmIndex]}
+				DoExpr {echo[`Changed realm to `+$realm+`.`,13]}
+				Return
 ~~ }
 
-~~========================= ONLY NAVS APPEAR BELOW THIS LINE =========================~~
+STATE: {Done} ~~ {
+	IF: Always
+		DO: DoAll
+				SetOpt {EnableNav} {false}
+				DoExpr {stopwatchstop[$meta_timer]}
+				DoExpr {echo[`Finished `+$quest_counter+` quests in `+stopwatchelapsedseconds[$meta_timer]+` seconds.`,13]}
+	~~ Can add logic here for starting next meta?
+~~}
 
-NAV: nav0____None__nav once ~~ {
+NAV: nav_empty once ~~ {}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~ Navs below this.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+NAV: nav_to_curator once ~~ {
 	cht -63.3045561949412 -61.6178907712301 0.550020790100098 {/vt opt set enablecombat false}
 	pnt -63.2329185167948 -61.6039361953735 0.550020790100098
 	pnt -63.3285595575968 -61.6280399004618 0.550020790100098
@@ -172,9 +308,7 @@ NAV: nav0____None__nav once ~~ {
 	pnt -30.625 -35.1587909698486 -0.174979162216187
 	pnt -30.6165469328562 -35.154222647349 -0.174979162216187
 ~~ }
-NAV: nav1____None__nav once ~~ {
+NAV: nav_turnin once ~~ {
 	pnt -63.2360487937927 -61.6059401830037 0.550020790100098
 	pnt -63.3351665496826 -61.6304361661275 0.550020790100098
-	cht -63.2512916882833 -61.6044142087301 0.550020790100098 {/mt givep Shard of the Curator to Morgethais}
-	pau -63.2512916882833 -61.6044142087301 0.550020790100098 3000
 ~~ }
