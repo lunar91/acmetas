@@ -683,7 +683,7 @@ s
 i
 26
 i
-5
+1
 TABLE
 2
 k
@@ -695,21 +695,8 @@ s
 e
 s
 wobjectfindininventorybynamerx[Aetherium Core Fragment]==0
-TABLE
-2
-k
-v
-n
-n
-2
-s
-st
 s
 IncDiff
-s
-ret
-s
-0-init
 s
 5-TurnIn
 i
@@ -757,22 +744,9 @@ e
 s
 echo[`You are still on timer for Unleashing Gearknights in `+$realm+`. Skipping to the next realm.`,12]
 i
-5
-TABLE
-2
-k
-v
-n
-n
-2
-s
-st
+1
 s
 IncDiff
-s
-ret
-s
-0-init
 s
 0-init
 i
@@ -1001,22 +975,9 @@ e
 s
 echo[`You are still on timer for `+$questName+` in `+$realm+`. Skipping to next realm.`,12]
 i
-5
-TABLE
-2
-k
-v
-n
-n
-2
-s
-st
+1
 s
 IncDiff
-s
-ret
-s
-CheckQuestFlag
 s
 CheckQuestFlag
 i
@@ -1347,7 +1308,7 @@ i
 i
 1
 s
-Quest data updated
+\[UB\] Quest data updated
 s
 WaitForQuestFlags
 s
@@ -1480,9 +1441,9 @@ e
 s
 echo[`Changed realm to `+$realm+`.`,13]
 i
-6
-i
-0
+1
+s
+CheckQuestFlag
 s
 IncDiff
 i

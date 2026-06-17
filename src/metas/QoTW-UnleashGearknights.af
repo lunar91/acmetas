@@ -130,7 +130,7 @@ STATE: {5-TurnIn} ~~ {
 			SecsInStateGE 120
 		DO: SetState {4-LoadTurnin}
 	IF: Expr {wobjectfindininventorybynamerx[Aetherium Core Fragment]==0}
-		DO: CallState {IncDiff} {0-init}
+		DO: SetState {IncDiff}
 ~~ }
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -141,7 +141,7 @@ STATE: {0-init} ~~ {
 	IF: Not Expr {getqueststatus[dictgetitem[$realms,$realm]+`aetheriumcorefragmentpickuptimer`]==1}
 		DO: DoAll
 				DoExpr {echo[`You are still on timer for Unleashing Gearknights in `+$realm+`. Skipping to the next realm.`,12]}
-				CallState {IncDiff} {0-init}
+				SetState {IncDiff}
 	IF:	Expr {getqueststatus[dictgetitem[$realms,$realm]+`aetheriumcorefragmentpickuptimer`]==1}
 		DO:	DoAll
 				SetOpt {EnableNav} {true}
@@ -177,7 +177,7 @@ STATE: {CheckQuestFlag} ~~ {
 	IF: Not Expr {getqueststatus[dictgetitem[$realms,$realm]+$questFlag]==1}
 		DO: DoAll
 				DoExpr {echo[`You are still on timer for `+$questName+` in `+$realm+`. Skipping to next realm.`,12]}
-				CallState {IncDiff} {CheckQuestFlag}
+				SetState {IncDiff}
 ~~ }
 
 ~~ Uses portal gem to go to TN. Retries every 2 seconds.
@@ -231,11 +231,6 @@ STATE: {WaitForQuestFlags} ~~ {
 		DO: SetState {CheckQuestFlag}
 ~~ }
 
-STATE: {WaitForQuestFlags} ~~ {
-	IF: SecsInStateGE 2
-		DO: SetState {CheckQuestFlag}
-~~ }
-
 ~~ Handles changing the realm
 ~~ if order is DOWN then it goes Torment VI -> Torment V -> ...
 ~~ Otherwise the it goes Normal -> Hard -> ...
@@ -255,7 +250,7 @@ STATE: {IncDiff} ~~ {
 		DO: DoAll
 				DoExpr {$realm=listgetitem[$allRealms,$realmIndex]}
 				DoExpr {echo[`Changed realm to `+$realm+`.`,13]}
-				Return
+				SetState {CheckQuestFlag}
 ~~ }
 
 STATE: {Done} ~~ {
