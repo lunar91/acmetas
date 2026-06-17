@@ -67,6 +67,12 @@ STATE: {2-Run} ~~ {
 		DO:	DoAll
 				Chat {/ub useip Eternal Gem of Dispelling}
 				SetState {2-Run}
+	IF: All
+			SecsInStateGE 10
+			NavEmpty
+			Not Expr {wobjectfindnearestbynameandobjectclass[27,Corpse of Curator of Torment]!=0}
+			Not Expr {wobjectfindnearestbynameandobjectclass[5,Curator of Torment]!=0}
+		DO: SetState {IncDiff}
 	IF:	All
 			NavEmpty
 			Expr {wobjectfindnearestbynameandobjectclass[27,Corpse of Curator of Torment]!=0}
@@ -75,30 +81,47 @@ STATE: {2-Run} ~~ {
 		DO:	CallState {Death} {1-RE}
 ~~ }
 STATE: {3-Loot} ~~ {
+~~ If we have already looted AND the corpse is still open, close it.
 	IF: All
 			Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
 			Expr {wobjectgetopencontainer[]!=0}
 		DO: DoExpr {actiontryuseitem[wobjectgetopencontainer[]]}
-	IF:	Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
+	
+~~ If we've looted AND closed the container, start turn in.
+	IF:	All
+			Expr {wobjectgetopencontainer[]==0}
+			Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
 		DO:	DoAll
 				DoExpr {chatbox[\/ub usei Rynthid Encampment Recall Gem +\(+getvar[realm]+\)]}
-				DoExpr {actiontryuseitem[wobjectgetopencontainer[]]}
+	
+~~ We started turn in by using the recall gem. Move to the turn in state
 	IF:	All
 			IntoPortal
 			BlockE 30320000
 		DO:	SetState {4-TurnIn}
+		
+~~ If no mobs nearby, and a container isn't open, open the corpse.
 	IF:	All
 			NoMobsInDist 10
 			Expr {wobjectgetopencontainer[]==0}
+			Not Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0} 
 		DO:	Chat {/ub uselp Corpse of Curator of Torment}
-	IF:	Expr {wobjectgetopencontainer[]!=0}
+		
+~~ If the currently open corpse has the shard, loot it
+	IF:	All
+			Expr {wobjectgetopencontainer[]!=0}
+			Expr {listcount[listfilter[wobjectfindallbycontainer[wobjectgetopencontainer[]],`strlen[wobjectgetname[$1]]>25&&wobjectgetname[$1]{{-25:}}==Curator of Torment's Mask`]]>0}
 		DO:	Chat {/mt lootp Shard of the Curator}
+
 	IF:	SecsInStateGE 3
 		DO:	SetState {3-Loot}
+
 	IF:	All
 			Death
 			Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
 		DO:	SetState {3-Loot}
+
+~~ Test
 	IF:	All
 			Death
 			Not Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
@@ -144,10 +167,10 @@ NAV: nav0____None__nav once ~~ {
 	tlk -63.3045561949412 -61.6178907712301 0.550020790100098 -63.3400295893351 -61.63109998703 0.55002498626709 37 {Morgethais}
 	pau -63.3045561949412 -61.6178907712301 0.550020790100098 2000
 	ptl -63.3045561949412 -61.6178907712301 0.550020790100098 -63.3482108275096 -61.6064720789592 0.549737513065338 14 {Inner Sanctum}
-	pau -63.3045561949412 -61.6178907712301 0.550020790100098 3000
 	cht -63.3045561949412 -61.6178907712301 0.550020790100098 {/vt opt set enablecombat true}
 	pnt -30.625 -35.2916666666667 -0.174979162216187
 	pnt -30.625 -35.1587909698486 -0.174979162216187
+	pnt -30.6165469328562 -35.154222647349 -0.174979162216187
 ~~ }
 NAV: nav1____None__nav once ~~ {
 	pnt -63.2360487937927 -61.6059401830037 0.550020790100098
