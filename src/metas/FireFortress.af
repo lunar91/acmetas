@@ -38,12 +38,16 @@
 ~~ }																					
 
 STATE: {0-init} ~~ {
-	IF:	Expr {getpvar[qc_+$realm+fire_fortress]+72000>getunixtime[]}
+	IF:	Expr {getqueststatus[dictgetitem[$realms,$realm]+`sulphorouspickup1`]==1}
 		DO:	DoAll
 				SetOpt {EnableCombat} {true}
 				SetOpt {EnableNav} {true}
 				CallState {1-TN} {2-NR}
 				SetOpt {EnableLooting} {false}
+	IF: Not Expr {getqueststatus[dictgetitem[$realms,$realm]+`sulphorouspickup1`]==1}
+		DO: DoAll
+				DoExpr {echo[`You are still on timer for Fire Fortress in `+$realm+`. Skipping to next realm.`,12]}
+				SetState {IncDiff}
 ~~ }
 STATE: {1-TN} ~~ {
 	IF:	Always
@@ -66,7 +70,7 @@ STATE: {2-NR} ~~ {
 STATE: {3-FF} ~~ {
 	IF:	ExitPortal
 		DO:	EmbedNav nav2__FireFortress_nav {FireFortress.nav}
-	IF:	Expr {wobjectgetname[wobjectfindnearestbynameandobjectclass[27,Treasure of Lucius\, God of Fire]]==Treasure of Lucius, God of Fire}
+	IF:	Expr {wobjectfindnearestbynameandobjectclass[27,`Treasure of Lucius, God of Fire`]!=0}
 		DO:	SetState {4-FF-Loot}
 	IF:	Death
 		DO:	CallState {Death} {0-init}
@@ -78,7 +82,7 @@ STATE: {3-FF} ~~ {
 STATE: {4-FF-Loot} ~~ {
 	IF:	NoMobsInDist 5
 		DO:	Chat {/ub uselp Treasure of Lucius}
-	IF:	Expr {strlen[wobjectgetname[wobjectfindininventorybynamerx[Sulphorous Essence]]]>=1}
+	IF:	Expr {wobjectfindininventorybynamerx[Sulphorous Essence]!=0}
 		DO:	DoAll
 				DoExpr {chatbox[\/ub usei Portal to Town Network Recall Gem +\(+getvar[realm]+\)]}
 	IF:	All
@@ -87,11 +91,11 @@ STATE: {4-FF-Loot} ~~ {
 		DO:	CallState {1-TN} {5-NR-TurnIn}
 	IF:	All
 			Death
-			Expr {strlen[wobjectgetname[wobjectfindininventorybynamerx[Sulphorous Essence]]]>=1}
+			Expr {wobjectfindininventorybynamerx[Sulphorous Essence]!=0}
 		DO:	CallState {1-TN} {5-NR-TurnIn}
 	IF:	All
 			Death
-			Not Expr {strlen[wobjectgetname[wobjectfindininventorybynamerx[Sulphorous Essence]]]>=1}
+			Not Expr {wobjectfindininventorybynamerx[Sulphorous Essence]!=0}
 		DO:	SetState {0-init}
 	IF:	SecsInStateGE 5
 		DO:	Chat {/mt lootp Sulphorous}
@@ -105,14 +109,13 @@ STATE: {5-NR-TurnIn} ~~ {
 				EmbedNav nav3___None_ {[none]}
 	IF:	All
 			NavEmpty
-			Not Expr {strlen[wobjectgetname[wobjectfindininventorybynamerx[Sulphorous Essence]]]>=1}
+			Not Expr {wobjectfindininventorybynamerx[Sulphorous Essence]!=0}
 		DO:	DoAll
-				DoExpr {setpvar[qc_+$realm+_fire_fortress,getdatetimeutc[]]}
 				CallState {IncDiff} {0-init}
 ~~ }
 STATE: {Death} ~~ {
 	IF:	Always
-		DO:	DoAll
+		DO:	DoAll				
 				SetOpt {EnableCombat} {true}
 				SetOpt {EnableNav} {true}
 				Return
@@ -120,7 +123,9 @@ STATE: {Death} ~~ {
 STATE: {Default} ~~ {
 	IF:	Always
 		DO:	DoAll
+				Chat {/myquests}
 				Chat {/ub opt set VTank.PatchExpressionEngine true}
+				DoExpr {setvar[realms,dictcreate[Normal,``,Hard,`difficulty-hard:`,Expert,`difficulty-expert:`,Master,`difficulty-master:`,Nightmare,`difficulty-nightmare:`,Torment,`difficulty-torment:`,Torment II,`difficulty-torment-ii:`,Torment III,`difficulty-torment-iii:`,Torment IV,`difficulty-torment-iv:`,Torment V,`difficulty-torment-v:`,Torment VI,`difficulty-torment-vi`]]}
 				DoExpr {setvar[realm,Normal]}
 				SetState {0-init}
 ~~ }

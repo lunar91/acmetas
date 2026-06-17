@@ -11,7 +11,7 @@ n
 n
 n
 n
-22
+23
 i
 26
 i
@@ -26,7 +26,7 @@ n
 s
 e
 s
-getpvar[qc_+$realm+fire_fortress]+72000>getunixtime[]
+getqueststatus[dictgetitem[$realms,$realm]+`sulphorouspickup1`]==1
 TABLE
 2
 K
@@ -102,6 +102,56 @@ s
 v
 s
 false
+s
+0-init
+i
+21
+i
+3
+TABLE
+2
+K
+V
+n
+n
+1
+i
+26
+TABLE
+2
+k
+v
+n
+n
+1
+s
+e
+s
+getqueststatus[dictgetitem[$realms,$realm]+`sulphorouspickup1`]==1
+TABLE
+2
+K
+V
+n
+n
+2
+i
+7
+TABLE
+2
+k
+v
+n
+n
+1
+s
+e
+s
+echo[`You are still on timer for Fire Fortress in `+$realm+`. Skipping to next realm.`,12]
+i
+1
+s
+IncDiff
 s
 0-init
 i
@@ -677,7 +727,7 @@ n
 s
 e
 s
-wobjectgetname[wobjectfindnearestbynameandobjectclass[27,Treasure of Lucius\, God of Fire]]==Treasure of Lucius, God of Fire
+wobjectfindnearestbynameandobjectclass[27,`Treasure of Lucius, God of Fire`]!=0
 s
 4-FF-Loot
 s
@@ -774,7 +824,7 @@ n
 s
 e
 s
-strlen[wobjectgetname[wobjectfindininventorybynamerx[Sulphorous Essence]]]>=1
+wobjectfindininventorybynamerx[Sulphorous Essence]!=0
 TABLE
 2
 K
@@ -860,7 +910,7 @@ n
 s
 e
 s
-strlen[wobjectgetname[wobjectfindininventorybynamerx[Sulphorous Essence]]]>=1
+wobjectfindininventorybynamerx[Sulphorous Essence]!=0
 TABLE
 2
 k
@@ -914,7 +964,7 @@ n
 s
 e
 s
-strlen[wobjectgetname[wobjectfindininventorybynamerx[Sulphorous Essence]]]>=1
+wobjectfindininventorybynamerx[Sulphorous Essence]!=0
 s
 0-init
 s
@@ -1036,27 +1086,14 @@ n
 s
 e
 s
-strlen[wobjectgetname[wobjectfindininventorybynamerx[Sulphorous Essence]]]>=1
+wobjectfindininventorybynamerx[Sulphorous Essence]!=0
 TABLE
 2
 K
 V
 n
 n
-2
-i
-7
-TABLE
-2
-k
-v
-n
-n
 1
-s
-e
-s
-setpvar[qc_+$realm+_fire_fortress,getdatetimeutc[]]
 i
 5
 TABLE
@@ -1141,11 +1178,28 @@ K
 V
 n
 n
-3
+5
+i
+2
+s
+/myquests
 i
 2
 s
 /ub opt set VTank.PatchExpressionEngine true
+i
+7
+TABLE
+2
+k
+v
+n
+n
+1
+s
+e
+s
+setvar[realms,dictcreate[Normal,``,Hard,`difficulty-hard:`,Expert,`difficulty-expert:`,Master,`difficulty-master:`,Nightmare,`difficulty-nightmare:`,Torment,`difficulty-torment:`,Torment II,`difficulty-torment-ii:`,Torment III,`difficulty-torment-iii:`,Torment IV,`difficulty-torment-iv:`,Torment V,`difficulty-torment-v:`,Torment VI,`difficulty-torment-vi`]]
 i
 7
 TABLE

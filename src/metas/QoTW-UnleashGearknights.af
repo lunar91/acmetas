@@ -36,12 +36,14 @@
 ~~		cht					jmp															
 ~~		prt (deprecated in VTank)														
 ~~ }											
-
+~~ aetheriumcorefragmentpickuptimer
 ~~ Default state. This handles starting when the meta is first selected. This should be configured on EVERY meta
 STATE: {Default} ~~ {
 	IF: Always
 		DO: DoAll
+				Chat {/myquests}
 				Chat {/ub opt set VTank.PatchExpressionEngine true}
+				DoExpr {setvar[realms,dictcreate[Normal,``,Hard,`difficulty-hard:`,Expert,`difficulty-expert:`,Master,`difficulty-master:`,Nightmare,`difficulty-nightmare:`,Torment,`difficulty-torment:`,Torment II,`difficulty-torment-ii:`,Torment III,`difficulty-torment-iii:`,Torment IV,`difficulty-torment-iv:`,Torment V,`difficulty-torment-v:`,Torment VI,`difficulty-torment-vi`]]}
 				DoExpr {setvar[realm,Normal]}
 				SetState {0-init}
 ~~}
@@ -108,9 +110,7 @@ STATE: {5-TurnIn} ~~ {
 			SecsInStateGE 120
 		DO: SetState {4-LoadTurnin}
 	IF: Expr {wobjectfindininventorybynamerx[Aetherium Core Fragment]==0}
-		DO: DoAll
-				DoExpr {setpvar[qc_+getvar[realm]+_unleash_gearknights,getunixtime[]]}
-				CallState {IncDiff} {0-init}
+		DO: CallState {IncDiff} {0-init}
 ~~ }
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -126,19 +126,18 @@ STATE: {SETUP} ~~ {
 				Return
 ~~ }
 STATE: {0-init} ~~ {
-	IF: Expr {getpvar[qc_+getvar[realm]+_unleash_gearknights]+72000>getunixtime[]}
+	IF: Expr {getqueststatus[dictgetitem[$realms,$realm]+`aetheriumcorefragmentpickuptimer`]==1}
 		DO: DoAll
 				DoExpr {echo[`You are still on timer for Lost Lore in `+$realm+`.`,12]}
 				DoExpr {echo[`To reset this type /ub mexec @qc_`+$realm+`_unleash_gearknights=0`,12]}
 				DoExpr {echo[`Skipping to next realm.`,12]}
 				CallState {IncDiff} {0-init}
-	IF:	Always
+	IF:	Not Expr {getqueststatus[dictgetitem[$realms,$realm]+`aetheriumcorefragmentpickuptimer`]==1}
 		DO:	DoAll
 				SetOpt {EnableNav} {true}
 				SetOpt {EnableLooting} {false}
 				SetOpt {EnableCombat} {true}
-	IF:	Always
-		DO:	DoExpr {chatbox[\/ub usei Portal to Town Network Recall Gem +\(+getvar[realm]+\)]}
+				DoExpr {chatbox[\/ub usei Portal to Town Network Recall Gem +\(+getvar[realm]+\)]}
 	IF:	All
 			IntoPortal
 			BlockE 00070000

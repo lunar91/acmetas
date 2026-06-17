@@ -37,6 +37,7 @@
 ~~		prt (deprecated in VTank)														
 ~~ }																					
 
+~~  tormentshardpickup
 STATE: {0-init} ~~ {
 	IF:	Always
 		DO:	DoAll
@@ -46,13 +47,13 @@ STATE: {0-init} ~~ {
 				SetOpt {EnableCombat} {false}
 ~~ }
 STATE: {1-RE} ~~ {
-	IF: Expr {getpvar[qc_+getvar[realm]+_curator]+72000>getunixtime[]}
+	IF: Not Expr {getqueststatus[dictgetitem[$realms,$realm]+`tormentshardpickup`]==1}
 		DO: DoAll
 				DoExpr {echo[`You are still on timer for Curator in `+$realm+`.`,12]}
 				DoExpr {echo[`To reset this type /ub mexec @qc_`+$realm+`_curator=0`,12]}
 				DoExpr {echo[`Skipping to next realm.`,12]}
 				SetState {IncDiff}
-	IF:	SecsInStateGE 1
+	IF:	Expr {getqueststatus[dictgetitem[$realms,$realm]+`tormentshardpickup`]==1}
 		DO:	DoExpr {chatbox[\/ub usei Rynthid Encampment Recall Gem +\(+getvar[realm]+\)]}
 	IF:	All
 			ExitPortal
@@ -103,9 +104,7 @@ STATE: {4-TurnIn} ~~ {
 	IF:	ExitPortal
 		DO:	EmbedNav nav1____None__nav { TurnIn.nav}
 	IF:	Not Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
-		DO:	DoAll
-				DoExpr {setpvar[qc_+getvar[realm]+_curator,getunixtime[]]}
-				SetState {IncDiff}
+		DO:	SetState {IncDiff}
 	IF:	Always
 		DO:	Chat {/b d}
 ~~ }
