@@ -202,7 +202,9 @@ STATE: {CheckQuestFlag} ~~ {
 	IF: Expr {$realm==NONE}
 		DO: SetState {Done}
 	IF:	Expr {getqueststatus[dictgetitem[$realms,$realm]+$questFlag]==1}
-		DO:	SetState {0-init}
+		DO:	DoAll
+				DoExpr {echo[`Starting `+$questName+` in `+$realm+`.`,12]}
+				SetState {0-init}
 	IF: Not Expr {getqueststatus[dictgetitem[$realms,$realm]+$questFlag]==1}
 		DO: DoAll
 				DoExpr {echo[`You are still on timer for `+$questName+` in `+$realm+`. Skipping to next realm.`,12]}
@@ -251,7 +253,12 @@ STATE: {InternalSetup} ~~{
 				DoExpr {setvar[quest_counter, 0]}
 				DoExpr {setvar[meta_timer, stopwatchcreate[]]}
 				DoExpr {stopwatchstart[$meta_timer]}
-	IF: ChatMatch {Quest data updated}
+	IF: ChatMatch {\[UB\] Quest data updated}
+		DO: SetState {WaitForQuestFlags}
+~~ }
+
+STATE: {WaitForQuestFlags} ~~ {
+	IF: SecsInStateGE 2
 		DO: SetState {CheckQuestFlag}
 ~~ }
 
