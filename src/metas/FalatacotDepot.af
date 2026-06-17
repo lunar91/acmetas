@@ -210,7 +210,7 @@ STATE: {9-Drop} ~~ {
 		DO: DoAll
 				Chat {/b d}
 				DoExpr {setvar[quest_counter, $quest_counter+1]}
-				CallState {IncDiff} {0-init}
+				SetState {IncDiff}
 
 ~~ }
 
@@ -235,7 +235,7 @@ STATE: {CheckQuestFlag} ~~ {
 	IF: Not Expr {getqueststatus[dictgetitem[$realms,$realm]+$questFlag]==1}
 		DO: DoAll
 				DoExpr {echo[`You are still on timer for `+$questName+` in `+$realm+`. Skipping to next realm.`,12]}
-				CallState {IncDiff} {CheckQuestFlag}
+				SetState {IncDiff}
 ~~ }
 
 ~~ Uses portal gem to go to TN. Retries every 2 seconds.
@@ -308,7 +308,7 @@ STATE: {IncDiff} ~~ {
 		DO: DoAll
 				DoExpr {$realm=listgetitem[$allRealms,$realmIndex]}
 				DoExpr {echo[`Changed realm to `+$realm+`.`,13]}
-				Return
+				SetState {CheckQuestFlag}
 ~~ }
 
 STATE: {Done} ~~ {

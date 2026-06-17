@@ -2013,22 +2013,9 @@ e
 s
 setvar[quest_counter, $quest_counter+1]
 i
-5
-TABLE
-2
-k
-v
-n
-n
-2
-s
-st
+1
 s
 IncDiff
-s
-ret
-s
-0-init
 s
 9-Drop
 i
@@ -2136,22 +2123,9 @@ e
 s
 echo[`You are still on timer for `+$questName+` in `+$realm+`. Skipping to next realm.`,12]
 i
-5
-TABLE
-2
-k
-v
-n
-n
-2
-s
-st
+1
 s
 IncDiff
-s
-ret
-s
-CheckQuestFlag
 s
 CheckQuestFlag
 i
@@ -2615,9 +2589,9 @@ e
 s
 echo[`Changed realm to `+$realm+`.`,13]
 i
-6
-i
-0
+1
+s
+CheckQuestFlag
 s
 IncDiff
 i
