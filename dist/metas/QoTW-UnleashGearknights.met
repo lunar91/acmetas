@@ -11,7 +11,7 @@ n
 n
 n
 n
-25
+26
 i
 1
 i
@@ -24,7 +24,7 @@ K
 V
 n
 n
-5
+4
 i
 2
 s
@@ -59,8 +59,14 @@ s
 e
 s
 setvar[realm,Normal]
+s
+Default
+i
+4
 i
 1
+s
+Quest data updated
 s
 0-init
 s
@@ -690,7 +696,7 @@ K
 V
 n
 n
-4
+2
 i
 7
 TABLE
@@ -703,33 +709,7 @@ n
 s
 e
 s
-echo[`You are still on timer for Lost Lore in `+$realm+`.`,12]
-i
-7
-TABLE
-2
-k
-v
-n
-n
-1
-s
-e
-s
-echo[`To reset this type /ub mexec @qc_`+$realm+`_unleash_gearknights=0`,12]
-i
-7
-TABLE
-2
-k
-v
-n
-n
-1
-s
-e
-s
-echo[`Skipping to next realm.`,12]
+echo[`You are still on timer for Lost Lore in `+$realm+`. Skipping to the next realm.`,12]
 i
 5
 TABLE

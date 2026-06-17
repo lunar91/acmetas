@@ -45,7 +45,8 @@ STATE: {Default} ~~ {
 				Chat {/ub opt set VTank.PatchExpressionEngine true}
 				DoExpr {setvar[realms,dictcreate[Normal,``,Hard,`difficulty-hard:`,Expert,`difficulty-expert:`,Master,`difficulty-master:`,Nightmare,`difficulty-nightmare:`,Torment,`difficulty-torment:`,Torment II,`difficulty-torment-ii:`,Torment III,`difficulty-torment-iii:`,Torment IV,`difficulty-torment-iv:`,Torment V,`difficulty-torment-v:`,Torment VI,`difficulty-torment-vi`]]}
 				DoExpr {setvar[realm,Normal]}
-				SetState {0-init}
+	IF: ChatMatch {Quest data updated}
+		DO: SetState {0-init}
 ~~}
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -128,9 +129,7 @@ STATE: {SETUP} ~~ {
 STATE: {0-init} ~~ {
 	IF: Expr {getqueststatus[dictgetitem[$realms,$realm]+`aetheriumcorefragmentpickuptimer`]==1}
 		DO: DoAll
-				DoExpr {echo[`You are still on timer for Lost Lore in `+$realm+`.`,12]}
-				DoExpr {echo[`To reset this type /ub mexec @qc_`+$realm+`_unleash_gearknights=0`,12]}
-				DoExpr {echo[`Skipping to next realm.`,12]}
+				DoExpr {echo[`You are still on timer for Lost Lore in `+$realm+`. Skipping to the next realm.`,12]}
 				CallState {IncDiff} {0-init}
 	IF:	Not Expr {getqueststatus[dictgetitem[$realms,$realm]+`aetheriumcorefragmentpickuptimer`]==1}
 		DO:	DoAll

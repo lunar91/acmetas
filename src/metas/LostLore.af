@@ -38,13 +38,11 @@
 ~~ }																					
 
 STATE: {0-init} ~~ {
-	IF: Expr {getqueststatus[dictgetitem[$realms,$realm]+`lostlorepagecompleted_0712`]==1}
+	IF: Not Expr {getqueststatus[dictgetitem[$realms,$realm]+`lostlorepagecompleted_0712`]==1}
 		DO: DoAll
-				DoExpr {echo[`You are still on timer for Lost Lore in `+$realm+`.`,12]}
-				DoExpr {echo[`To reset this type /ub mexec @qc_`+$realm+`_lost_lore=0`,12]}
-				DoExpr {echo[`Skipping to next realm.`,12]}
+				DoExpr {echo[`You are still on timer for Lost Lore in `+$realm+`. Skipping to the next realm.`,12]}
 				SetState {IncDiff}
-	IF:	Not Expr {getqueststatus[dictgetitem[$realms,$realm]+`lostlorepagecompleted_0712`]==1}
+	IF:	Expr {getqueststatus[dictgetitem[$realms,$realm]+`lostlorepagecompleted_0712`]==1}
 		DO:	DoAll
 				SetOpt {EnableNav} {true}
 				SetOpt {EnableLooting} {false}
@@ -235,11 +233,12 @@ STATE: {Death} ~~ {
 STATE: {Default} ~~ {
 	IF:	Always
 		DO:	DoAll
+				SetOpt {EnableNav} {false}
 				Chat {/myquests}
 				Chat {/ub opt set VTank.PatchExpressionEngine true}
 				DoExpr {setvar[realms,dictcreate[Normal,``,Hard,`difficulty-hard:`,Expert,`difficulty-expert:`,Master,`difficulty-master:`,Nightmare,`difficulty-nightmare:`,Torment,`difficulty-torment:`,Torment II,`difficulty-torment-ii:`,Torment III,`difficulty-torment-iii:`,Torment IV,`difficulty-torment-iv:`,Torment V,`difficulty-torment-v:`,Torment VI,`difficulty-torment-vi`]]}
 				DoExpr {setvar[realm,Normal]}
-	IF: SecsInStateGE 5
+	IF: ChatMatch {Quest data updated}
 		DO: SetState {0-init}
 ~~ }
 STATE: {IncDiff} ~~ {

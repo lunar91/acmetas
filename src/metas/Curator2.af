@@ -49,9 +49,7 @@ STATE: {0-init} ~~ {
 STATE: {1-RE} ~~ {
 	IF: Not Expr {getqueststatus[dictgetitem[$realms,$realm]+`tormentshardpickup`]==1}
 		DO: DoAll
-				DoExpr {echo[`You are still on timer for Curator in `+$realm+`.`,12]}
-				DoExpr {echo[`To reset this type /ub mexec @qc_`+$realm+`_curator=0`,12]}
-				DoExpr {echo[`Skipping to next realm.`,12]}
+				DoExpr {echo[`You are still on timer for Curator in `+$realm+`. Skipping to the next realm.`,12]}
 				SetState {IncDiff}
 	IF:	Expr {getqueststatus[dictgetitem[$realms,$realm]+`tormentshardpickup`]==1}
 		DO:	DoExpr {chatbox[\/ub usei Rynthid Encampment Recall Gem +\(+getvar[realm]+\)]}
@@ -69,16 +67,22 @@ STATE: {2-Run} ~~ {
 		DO:	DoAll
 				Chat {/ub useip Eternal Gem of Dispelling}
 				SetState {2-Run}
-	IF:	Expr {wobjectfindnearestbynameandobjectclass[27,Corpse of Curator of Torment]!=0}
+	IF:	All
+			NavEmpty
+			Expr {wobjectfindnearestbynameandobjectclass[27,Corpse of Curator of Torment]!=0}
 		DO:	SetState {3-Loot}
 	IF:	Death
 		DO:	CallState {Death} {1-RE}
 ~~ }
 STATE: {3-Loot} ~~ {
+	IF: All
+			Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
+			Expr {wobjectgetopencontainer[]!=0}
+		DO: DoExpr {actiontryuseitem[wobjectgetopencontainer[]]}
 	IF:	Expr {wobjectfindininventorybynamerx[Shard of the Curator]!=0}
 		DO:	DoAll
-				DoExpr {actiontryuseitem[wobjectgetopencontainer[]]}
 				DoExpr {chatbox[\/ub usei Rynthid Encampment Recall Gem +\(+getvar[realm]+\)]}
+				DoExpr {actiontryuseitem[wobjectgetopencontainer[]]}
 	IF:	All
 			IntoPortal
 			BlockE 30320000
@@ -117,9 +121,12 @@ STATE: {Death} ~~ {
 STATE: {Default} ~~ {
 	IF:	Always
 		DO:	DoAll
+				Chat {/myquests}
 				Chat {/ub opt set VTank.PatchExpressionEngine true}
+				DoExpr {setvar[realms,dictcreate[Normal,``,Hard,`difficulty-hard:`,Expert,`difficulty-expert:`,Master,`difficulty-master:`,Nightmare,`difficulty-nightmare:`,Torment,`difficulty-torment:`,Torment II,`difficulty-torment-ii:`,Torment III,`difficulty-torment-iii:`,Torment IV,`difficulty-torment-iv:`,Torment V,`difficulty-torment-v:`,Torment VI,`difficulty-torment-vi`]]}
 				DoExpr {setvar[realm,Normal]}
-				SetState {0-init}
+	IF: ChatMatch {Quest data updated}
+		DO: SetState {0-init}
 ~~ }
 STATE: {IncDiff} ~~ {
 	IF:	Always
