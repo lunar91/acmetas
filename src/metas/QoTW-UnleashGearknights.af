@@ -130,7 +130,9 @@ STATE: {5-TurnIn} ~~ {
 			SecsInStateGE 120
 		DO: SetState {4-LoadTurnin}
 	IF: Expr {wobjectfindininventorybynamerx[Aetherium Core Fragment]==0}
-		DO: SetState {IncDiff}
+		DO: DoAll
+				DoExpr {setvar[quest_counter,$quest_counter+1]}
+				SetState {IncDiff}
 ~~ }
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
