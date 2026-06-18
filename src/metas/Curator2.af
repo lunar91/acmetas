@@ -114,7 +114,9 @@ STATE: {2-Run} ~~ {
 			NavEmpty
 			Not Expr {wobjectfindnearestbynameandobjectclass[27,Corpse of Curator of Torment]!=0}
 			Not Expr {wobjectfindnearestbynameandobjectclass[5,Curator of Torment]!=0}
-		DO: SetState {IncDiff}
+		DO: DoAll
+				DoExpr {setvar[quest_counter,$quest_counter+1]}
+				SetState {IncDiff}
 	IF:	All
 			NavEmpty
 			Expr {wobjectfindnearestbynameandobjectclass[27,Corpse of Curator of Torment]!=0}
