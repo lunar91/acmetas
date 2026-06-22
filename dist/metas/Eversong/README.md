@@ -10,6 +10,18 @@ Unless otherwise specified, all of the Everson metas have these requirements:
   - Override Virindi Tank meta expressions with Utility Belt meta expressions (Automatically set by the metas on start in the Default state)
 - You must have Town Network Recall Gems for each difficulty.
 
+## Meta List
+  - **CollectQB:** Collect QB points from talking to NPCs
+  - **Curator2:** Complete Rynthid Tentacle Weapons (Curator of Torment)
+  - **Dispell:** Just uses the dispell gem whenever a debuff is cast on you.
+  - **DrudgePlan:** WIP
+  - **FalatacotDepot:** Runs the Falatacot Depot quest.
+  - **LostLore:** Runs the Lost Lore quest
+  - **QoTW-UnleashGearknights:** Runs the Unleash Gearknights quest using the QoTW shortcut.
+  - **StipendCollection:** Collects stipends.
+  - **UndergroundForest:** Runs Custom UndergroundForest
+  - **FireFortress:** Runs Custom FireFortress
+
 # Configuration Eversong Metas
 This collection of Eversong Metas includes configuration for setting the order to run difficulties in AND configuring a minimum and maximum difficulty.
 
