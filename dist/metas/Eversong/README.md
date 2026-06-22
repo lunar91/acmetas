@@ -18,6 +18,7 @@ Unless otherwise specified, all of the Everson metas have these requirements:
   - **FalatacotDepot:** Runs the Falatacot Depot quest.
   - **LostLore:** Runs the Lost Lore quest
   - **QoTW-UnleashGearknights:** Runs the Unleash Gearknights quest using the QoTW shortcut.
+  - **QoTW-ApostateFinale:** Runs the Apostate Finale quest using the QoTW shortcut.
   - **StipendCollection:** Collects stipends.
   - **UndergroundForest:** Runs Custom UndergroundForest
   - **FireFortress:** Runs Custom FireFortress
