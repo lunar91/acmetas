@@ -238,7 +238,7 @@ STATE: {Default} ~~ {
 				Chat {/ub opt set VTank.PatchExpressionEngine true}
 				DoExpr {setvar[realms,dictcreate[Normal,``,Hard,`difficulty-hard:`,Expert,`difficulty-expert:`,Master,`difficulty-master:`,Nightmare,`difficulty-nightmare:`,Torment,`difficulty-torment:`,Torment II,`difficulty-torment-ii:`,Torment III,`difficulty-torment-iii:`,Torment IV,`difficulty-torment-iv:`,Torment V,`difficulty-torment-v:`,Torment VI,`difficulty-torment-vi`]]}
 				DoExpr {setvar[realm,Normal]}
-	IF: ChatMatch {Quest data updated}
+	IF: ChatMatch {\[UB\] Quest data updated}
 		DO: SetState {0-init}
 ~~ }
 STATE: {IncDiff} ~~ {
