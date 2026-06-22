@@ -109,6 +109,18 @@ STATE: {3-Loot} ~~ {
 			NoMobsInDist 10 
 			Expr {wobjectgetopencontainer[]!=0}
 		DO: DoExpr {chatbox[\/mt lootp Shard of the Apostate Grand Director]}
+	
+	~~ on death if we have ALREADY looted the shard
+	IF: All
+			Death
+			Expr {wobjectfindininventorybynamerx[Shard of the Apostate Grand Director]!=0}
+		DO: CallState {Setup} {4-LoadTurnin}
+	~~ on death if we have NOT already looted the shard
+	IF: All
+			Death
+			Not Expr {wobjectfindininventorybynamerx[Shard of the Apostate Grand Director]!=0}
+		DO: SetState {0-init}
+	
 	IF: SecsInStateGE 3
 		DO: SetState {3-Loot}
 	IF: Expr {wobjectfindininventorybynamerx[Shard of the Apostate Grand Director]!=0}
