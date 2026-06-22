@@ -14,3 +14,5 @@ Feel free to submit a Pull request with your changes / additions.
     - MetaF directory added to %PATH%
     - VSCode RunOnSave extension
   - `.vscode/settings.json` includes configuration for automatically building src to dist.
+    - You can add automatically building/overwriting your meta in your vTank folder by updating the `"cmd"` line of settings.json to include `; metaf ${file} C:\\\\Games\\\\VirindiPlugins\\\\VirindiTank\\\\` at the end. Make sure to update the path (escaped) to match your vTank install path.
+
