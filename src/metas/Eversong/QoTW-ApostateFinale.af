@@ -257,6 +257,17 @@ STATE: {WaitForQuestFlags} ~~ {
 		DO: SetState {CheckQuestFlag}
 ~~ }
 
+STATE: {GetCurrentRealm} ~~ {
+	IF: Always
+		DO: DoAll
+				DoExpr {$modeRealmMap=dictcreate[NORMAL,Normal,HARD,Hard,EXPERT,Expert,MASTER,Master,NIGHTMARE,Nightmare,TORMENT,Torment,TORMENT II,Torment II,TORMENT III,Torment III,TORMENT IV,Torment IV,TORMENT V,Torment V,TORMENT VI,Torment VI]}
+				Chat {/mode}
+	IF: ChatCapture {^\*\*\*You are currently on (?<realm>[A-Za-z\s]+) realm.\*\*\*$} {}
+		DO: DoAll
+				DoExpr {$currentRealm=dictgetitem[$modeRealmMap,$capturegroup_realm]}
+				Return
+~~ }
+
 ~~ Handles changing the realm
 ~~ if order is DOWN then it goes Torment VI -> Torment V -> ...
 ~~ Otherwise the it goes Normal -> Hard -> ...
