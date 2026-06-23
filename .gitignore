@@ -1,0 +1,4 @@
+# Temporary Files for importing navs/metas from vTank
+dist/tmp/
+src/tmp/
+.vscode/*.code-workspace
