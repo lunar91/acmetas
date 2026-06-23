@@ -109,7 +109,9 @@ STATE: {1-Start} ~~ {
 ~~ }
 
 STATE: {2-Run} ~~ {
-	IF:	Expr {wobjectfindnearestbynameandobjectclass[27,`Treasure of Lucius, God of Fire`]!=0}
+	IF:	All
+			NavEmpty
+			Expr {wobjectfindnearestbynameandobjectclass[27,`Treasure of Lucius, God of Fire`]!=0}
 		DO:	SetState {3-Loot}
 	IF:	Death
 		DO:	CallState {Death} {0-init}
