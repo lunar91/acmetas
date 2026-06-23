@@ -1,0 +1,1 @@
+Each folder contains metas for a specific Asheron's Call server.
