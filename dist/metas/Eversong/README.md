@@ -1,4 +1,5 @@
 # Everson Metas
+Download the metas [lunar-acmetas.zip](../../../lunar-acmetas.zip)
 
 ## Requirements
 Unless otherwise specified, all of the Everson metas have these requirements:
