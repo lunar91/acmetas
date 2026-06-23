@@ -99,7 +99,9 @@ STATE: {2-Run} ~~ {
 				SetState {2-Run}
 ~~ } 
 STATE: {3-Loot} ~~ {
-	IF:	NoMobsInDist 5
+	IF:	All
+			NoMobsInDist 5
+			Not Expr {wobjectfindininventorybynamerx[Verdant Essence]!=0}
 		DO:	Chat {/ub uselp Corpse of Turius}
 	~~ If we have already looted AND the corpse is still open, close it.
 	IF: All
